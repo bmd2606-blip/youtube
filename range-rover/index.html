@@ -37,7 +37,7 @@
       #card {
         position: absolute;
         left: 2250px;
-        top: 120px;
+        top: 90px;
         width: 1400px;
         padding: 64px 84px 70px;
         border-radius: 72px;
@@ -70,39 +70,70 @@
         height: 140%;
         background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
       }
-      #text {
-        position: relative;
+      #card {
+        height: 460px;
+      }
+      .big-wrap {
+        position: absolute;
+        left: 0;
+        right: 0;
         text-align: center;
         color: #ffffff;
         text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
       }
-      #kicker {
-        font-size: 50px;
-        font-weight: 600;
-        letter-spacing: 0.42em;
-        padding-left: 0.42em;
-        opacity: 0.92;
-      }
-      #line {
-        width: 260px;
-        height: 4px;
-        margin: 30px auto 26px;
-        border-radius: 2px;
-        background: rgba(255, 255, 255, 0.85);
-      }
-      #title-mask {
+      .mask {
         overflow: hidden;
-        padding: 6px 0 10px;
+        padding: 8px 0 12px;
       }
-      #title {
+      .big {
         font-size: 132px;
         font-weight: 800;
         letter-spacing: 0.04em;
         line-height: 1;
         white-space: nowrap;
       }
-      #title span {
+      .big span {
         display: inline-block;
+      }
+      /* RANGE ROVER: empieza centrado y luego sube y se reduce */
+      #t1-wrap {
+        top: 150px;
+        transform-origin: 50% 50%;
+      }
+      /* LAND ROVER: ocupa el hueco de abajo */
+      #t2-wrap {
+        top: 250px;
+      }
+      #divider {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        color: #ffffff;
+        text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      }
+      .rule {
+        width: 220px;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.85);
+      }
+      #rule-l {
+        transform-origin: right center;
+      }
+      #rule-r {
+        transform-origin: left center;
+      }
+      #o {
+        font-family: "Playfair Display", Georgia, serif;
+        font-style: italic;
+        font-size: 84px;
+        line-height: 1;
+        margin-top: -12px;
       }
     </style>
   </head>
@@ -130,11 +161,19 @@
       <div id="card" class="clip" data-start="0" data-duration="3.23" data-track-index="1">
         <div id="rim"></div>
         <div id="shine" data-layout-allow-overflow></div>
-        <div id="text">
-          <div id="kicker">LAND ROVER</div>
-          <div id="line"></div>
-          <div id="title-mask" data-layout-allow-occlusion>
-            <div id="title"><span>R</span><span>A</span><span>N</span><span>G</span><span>E</span><span>&nbsp;</span><span>R</span><span>O</span><span>V</span><span>E</span><span>R</span></div>
+        <div id="t1-wrap" class="big-wrap">
+          <div class="mask" data-layout-allow-occlusion>
+            <div id="t1" class="big" data-layout-allow-occlusion><span>R</span><span>A</span><span>N</span><span>G</span><span>E</span><span>&nbsp;</span><span>R</span><span>O</span><span>V</span><span>E</span><span>R</span></div>
+          </div>
+        </div>
+        <div id="divider">
+          <div id="rule-l" class="rule"></div>
+          <div id="o">o</div>
+          <div id="rule-r" class="rule"></div>
+        </div>
+        <div id="t2-wrap" class="big-wrap">
+          <div class="mask" data-layout-allow-occlusion>
+            <div id="t2" class="big" data-layout-allow-occlusion><span>L</span><span>A</span><span>N</span><span>D</span><span>&nbsp;</span><span>R</span><span>O</span><span>V</span><span>E</span><span>R</span></div>
           </div>
         </div>
       </div>
@@ -150,11 +189,17 @@
         { opacity: 1, scaleX: 1, scaleY: 1, y: 0, duration: 0.7, ease: "back.out(1.6)" },
         0.1
       );
-      tl.fromTo("#kicker", { opacity: 0, y: 20 }, { opacity: 0.92, y: 0, duration: 0.45, ease: "power2.out" }, 0.45);
-      tl.fromTo("#line", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 0.55);
-      tl.fromTo("#title span", { y: 170 }, { y: 0, duration: 0.55, ease: "power4.out", stagger: 0.035 }, 0.6);
-      tl.fromTo("#shine", { x: -600, skewX: -15 }, { x: 1700, skewX: -15, duration: 1.1, ease: "power2.inOut" }, 1.3);
-      // Leve flotación hasta el final
+      // "RANGE ROVER" (primer tramo de voz, 0.15 s)
+      tl.fromTo("#t1 span", { y: 170 }, { y: 0, duration: 0.5, ease: "power4.out", stagger: 0.03 }, 0.25);
+
+      // "o LAND ROVER" (segundo tramo de voz, 1.35 s)
+      tl.to("#t1-wrap", { y: -105, scale: 0.42, duration: 0.4, ease: "power3.inOut" }, 1.2);
+      tl.fromTo(".rule", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, 1.5);
+      tl.fromTo("#o", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.5)" }, 1.5);
+      tl.fromTo("#t2 span", { y: 170 }, { y: 0, duration: 0.5, ease: "power4.out", stagger: 0.03 }, 1.55);
+
+      // Reflejo y flotación
+      tl.fromTo("#shine", { x: -600, skewX: -15 }, { x: 1800, skewX: -15, duration: 1.1, ease: "power2.inOut" }, 2.1);
       tl.to("#card", { y: -14, duration: 2.2, ease: "sine.inOut" }, 1.0);
 
       window.__timelines["main"] = tl;
