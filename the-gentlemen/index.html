@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #050605;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: "Playfair Display", Georgia, serif;
+        color: #efe6d2;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+      }
+
+      /* ---------- Intro / Outro ---------- */
+      .card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at center, #16201a 0%, #050605 70%);
+      }
+      .rule {
+        width: 900px;
+        transform: scaleX(0);
+        height: 2px;
+        background: #c9a45c;
+      }
+      .kicker {
+        font-size: 40px;
+        letter-spacing: 0.6em;
+        color: #c9a45c;
+        margin: 36px 0 8px;
+        padding-left: 0.6em;
+      }
+      .wordmark {
+        font-size: 170px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        line-height: 1;
+        margin-bottom: 40px;
+      }
+      .wordmark span {
+        display: inline-block;
+      }
+      .tagline {
+        font-size: 38px;
+        font-style: italic;
+        color: #bdb3a0;
+        margin-top: 36px;
+      }
+
+      /* ---------- Galería ---------- */
+      .shot {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        overflow: hidden;
+      }
+      .shot img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .shot::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(0deg, rgba(5, 6, 5, 0.85) 0%, rgba(5, 6, 5, 0) 45%);
+      }
+      .lower {
+        position: absolute;
+        left: 140px;
+        bottom: 190px;
+        z-index: 2;
+      }
+      .lower .line {
+        width: 160px;
+        transform: scaleX(0);
+        transform-origin: left center;
+        height: 3px;
+        background: #c9a45c;
+        margin-bottom: 22px;
+      }
+      .lower h2 {
+        font-size: 86px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      .lower p {
+        font-size: 36px;
+        font-style: italic;
+        color: #c9a45c;
+        margin-top: 10px;
+      }
+
+      /* ---------- Bandas cinemascope ---------- */
+      .bar {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 110px;
+        background: #000;
+        z-index: 10;
+      }
+      #bar-top {
+        top: 0;
+      }
+      #bar-bottom {
+        bottom: 0;
+      }
+      #fade {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0;
+        z-index: 11;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="22"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Intro -->
+      <div id="intro" class="scene card clip" data-start="0" data-duration="4" data-track-index="0">
+        <div id="intro-rule" class="rule"></div>
+        <div id="intro-kicker" class="kicker">THE</div>
+        <div id="intro-word" class="wordmark">
+          <span>G</span><span>E</span><span>N</span><span>T</span><span>L</span><span>E</span><span>M</span><span>E</span><span>N</span>
+        </div>
+        <div id="intro-rule-2" class="rule"></div>
+        <div id="intro-tag" class="tagline">Aristócratas. Herencias. Negocios peligrosos.</div>
+      </div>
+
+      <!-- Galería: sustituye assets/imagenes/escena-N.jpg por tus imágenes -->
+      <div id="gallery" class="scene clip" data-start="3.5" data-duration="15" data-track-index="1">
+        <div id="shot-1" class="shot">
+          <img src="assets/imagenes/escena-1.jpg" alt="" />
+          <div class="lower"><div class="line"></div><h2>Eddie Horniman</h2><p>El heredero inesperado</p></div>
+        </div>
+        <div id="shot-2" class="shot">
+          <img src="assets/imagenes/escena-2.jpg" alt="" />
+          <div class="lower"><div class="line"></div><h2>Susie Glass</h2><p>La que manda en las sombras</p></div>
+        </div>
+        <div id="shot-3" class="shot">
+          <img src="assets/imagenes/escena-3.jpg" alt="" />
+          <div class="lower"><div class="line"></div><h2>Freddy Horniman</h2><p>Un problema con patas</p></div>
+        </div>
+        <div id="shot-4" class="shot">
+          <img src="assets/imagenes/escena-4.jpg" alt="" />
+          <div class="lower"><div class="line"></div><h2>Stanley Glass</h2><p>El viejo lobo</p></div>
+        </div>
+        <div id="shot-5" class="shot">
+          <img src="assets/imagenes/escena-5.jpg" alt="" />
+          <div class="lower"><div class="line"></div><h2>Halstead Manor</h2><p>Donde todo se juega</p></div>
+        </div>
+      </div>
+
+      <!-- Cierre -->
+      <div id="outro" class="scene card clip" data-start="18" data-duration="4" data-track-index="2">
+        <div id="outro-rule" class="rule"></div>
+        <div id="outro-kicker" class="kicker">THE</div>
+        <div id="outro-word" class="wordmark">GENTLEMEN</div>
+        <div id="outro-tag" class="tagline">Una serie de Guy Ritchie</div>
+      </div>
+
+      <div id="bar-top" class="bar"></div>
+      <div id="bar-bottom" class="bar"></div>
+      <div id="fade"></div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // ---------- Intro (0 – 4s) ----------
+      tl.fromTo("#intro", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, 0);
+      tl.to("#intro-rule", { scaleX: 1, duration: 0.9, ease: "power3.inOut" }, 0.2);
+      tl.fromTo("#intro-kicker", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, 0.5);
+      tl.fromTo(
+        "#intro-word span",
+        { opacity: 0, y: 60, filter: "blur(12px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power3.out", stagger: 0.07 },
+        0.7
+      );
+      tl.to("#intro-rule-2", { scaleX: 1, duration: 0.9, ease: "power3.inOut" }, 1.3);
+      tl.fromTo("#intro-tag", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 1.8);
+      tl.to("#intro", { opacity: 0, scale: 1.04, duration: 0.6, ease: "power2.in" }, 3.4);
+
+      // ---------- Galería (3.5 – 18.5s) ----------
+      const SHOT = 3; // segundos por imagen
+      const XFADE = 0.6; // fundido entre imágenes
+      for (let i = 0; i < 5; i++) {
+        const id = `#shot-${i + 1}`;
+        const t = 3.5 + i * SHOT;
+        const panFrom = i % 2 === 0 ? -40 : 40;
+
+        tl.to(id, { opacity: 1, duration: XFADE, ease: "power1.inOut" }, t);
+        // Ken Burns: zoom lento + desplazamiento lateral
+        tl.fromTo(
+          `${id} img`,
+          { scale: 1.02, x: panFrom },
+          { scale: 1.14, x: -panFrom, duration: SHOT + XFADE, ease: "none" },
+          t
+        );
+        tl.fromTo(`${id} .line`, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.out" }, t + 0.4);
+        tl.fromTo(`${id} h2`, { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, t + 0.5);
+        tl.fromTo(`${id} p`, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, t + 0.7);
+        tl.to(`${id} .lower`, { opacity: 0, duration: 0.4, ease: "power1.in" }, t + SHOT - 0.3);
+        if (i > 0) tl.set(`#shot-${i}`, { opacity: 0 }, t + XFADE);
+      }
+      tl.to("#shot-5", { opacity: 0, duration: 0.6, ease: "power1.in" }, 18);
+
+      // ---------- Cierre (18 – 22s) ----------
+      tl.fromTo("#outro", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, 18.2);
+      tl.fromTo("#outro-rule", { scaleX: 0 }, { scaleX: 0.78, duration: 0.9, ease: "power3.inOut" }, 18.4);
+      tl.fromTo("#outro-kicker", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 18.6);
+      tl.fromTo("#outro-word", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 1, ease: "power3.out" }, 18.7);
+      tl.fromTo("#outro-tag", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 19.3);
+      tl.to("#fade", { opacity: 1, duration: 0.9, ease: "power1.in" }, 21.1);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
