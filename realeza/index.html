@@ -10,47 +10,32 @@
         padding: 0;
         box-sizing: border-box;
       }
+      /* Sin fondo: renderizar con --format mov o webm para conservar la transparencia */
       html,
       body {
         margin: 0;
         width: 1920px;
         height: 1080px;
         overflow: hidden;
-        background: #0b0f2a;
+        background: transparent;
       }
       #root {
         width: 100%;
         height: 100%;
         position: relative;
         overflow: hidden;
-        font-family: "Playfair Display", Georgia, serif;
-        color: #f6ecd2;
       }
       #scene {
         position: absolute;
         inset: 0;
-        background:
-          radial-gradient(ellipse at 50% 40%, rgba(122, 20, 40, 0.55) 0%, rgba(11, 15, 42, 0) 55%),
-          radial-gradient(ellipse at center, #1a2156 0%, #0b0f2a 75%);
-      }
-      /* Patrón heráldico de rombos dorados muy sutil */
-      #pattern {
-        position: absolute;
-        inset: -100px;
-        opacity: 0;
-        background-image:
-          linear-gradient(45deg, rgba(212, 175, 55, 0.07) 25%, transparent 25%, transparent 75%, rgba(212, 175, 55, 0.07) 75%),
-          linear-gradient(45deg, rgba(212, 175, 55, 0.07) 25%, transparent 25%, transparent 75%, rgba(212, 175, 55, 0.07) 75%);
-        background-size: 80px 80px;
-        background-position: 0 0, 40px 40px;
       }
       #crown {
         position: absolute;
         left: 50%;
-        top: 120px;
-        width: 420px;
-        height: 290px;
-        margin-left: -210px;
+        top: 50%;
+        width: 840px;
+        height: 580px;
+        margin: -290px 0 0 -420px;
       }
       #crown .outline {
         fill: none;
@@ -66,89 +51,6 @@
         transform-box: fill-box;
         transform-origin: center;
       }
-      #glow {
-        position: absolute;
-        left: 50%;
-        top: 70px;
-        width: 700px;
-        height: 420px;
-        margin-left: -350px;
-        background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0) 65%);
-        opacity: 0;
-      }
-      .spark {
-        position: absolute;
-        width: 18px;
-        height: 18px;
-        margin: -9px 0 0 -9px;
-        background: radial-gradient(circle, #fff6d0 0%, rgba(212, 175, 55, 0.9) 30%, rgba(212, 175, 55, 0) 70%);
-        clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
-        opacity: 0;
-      }
-      #titles {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 470px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      .rule {
-        width: 760px;
-        height: 2px;
-        background: linear-gradient(90deg, rgba(212, 175, 55, 0), #d4af37 20%, #d4af37 80%, rgba(212, 175, 55, 0));
-        transform: scaleX(0);
-      }
-      #kicker {
-        font-size: 34px;
-        letter-spacing: 0.7em;
-        padding-left: 0.7em;
-        color: #d4af37;
-        margin: 30px 0 6px;
-      }
-      #title-wrap {
-        position: relative;
-        overflow: hidden;
-        padding: 0 20px;
-      }
-      #title {
-        font-size: 190px;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        line-height: 1.1;
-        color: #f6ecd2;
-      }
-      #title span {
-        display: inline-block;
-      }
-      #sheen {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 260px;
-        height: 100%;
-        background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 244, 200, 0.55) 50%, rgba(255, 255, 255, 0) 100%);
-        mix-blend-mode: overlay;
-      }
-      #tagline {
-        display: flex;
-        gap: 36px;
-        margin-top: 34px;
-        font-size: 44px;
-        font-style: italic;
-        color: #e9dcb8;
-      }
-      #tagline .dot {
-        color: #ea5a70;
-        font-style: normal;
-      }
-      #fade {
-        position: absolute;
-        inset: 0;
-        background: #05071a;
-        opacity: 0;
-      }
     </style>
   </head>
   <body>
@@ -156,14 +58,11 @@
       id="root"
       data-composition-id="main"
       data-start="0"
-      data-duration="9"
+      data-duration="6"
       data-width="1920"
       data-height="1080"
     >
-      <div id="scene" class="clip" data-start="0" data-duration="9" data-track-index="0">
-        <div id="pattern"></div>
-        <div id="glow"></div>
-
+      <div id="scene" class="clip" data-start="0" data-duration="6" data-track-index="0">
         <svg id="crown" viewBox="0 0 420 290">
           <defs>
             <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
@@ -189,71 +88,21 @@
           <circle class="jewel" cx="210" cy="223" r="14" fill="#1f4fbf" />
           <circle class="jewel" cx="290" cy="223" r="12" fill="#b3243b" />
         </svg>
-
-        <div class="spark" style="left: 700px; top: 170px"></div>
-        <div class="spark" style="left: 1230px; top: 150px"></div>
-        <div class="spark" style="left: 820px; top: 380px"></div>
-        <div class="spark" style="left: 1110px; top: 400px"></div>
-        <div class="spark" style="left: 640px; top: 300px"></div>
-        <div class="spark" style="left: 1290px; top: 290px"></div>
-        <div class="spark" style="left: 960px; top: 95px"></div>
-        <div class="spark" style="left: 420px; top: 620px"></div>
-        <div class="spark" style="left: 1500px; top: 640px"></div>
-        <div class="spark" style="left: 300px; top: 860px"></div>
-        <div class="spark" style="left: 1620px; top: 880px"></div>
-        <div class="spark" style="left: 960px; top: 1000px"></div>
-
-        <div id="titles">
-          <div id="rule-1" class="rule"></div>
-          <div id="kicker">LA REALEZA</div>
-          <div id="title-wrap">
-            <div id="title"><span>I</span><span>N</span><span>G</span><span>L</span><span>E</span><span>S</span><span>A</span></div>
-            <div id="sheen"></div>
-          </div>
-          <div id="rule-2" class="rule"></div>
-          <div id="tagline">
-            <span class="word">Pompa</span><span class="dot">✦</span>
-            <span class="word">Tradición</span><span class="dot">✦</span>
-            <span class="word">Corona</span>
-          </div>
-        </div>
-
-        <div id="fade"></div>
       </div>
     </div>
 
     <script>
       const tl = gsap.timeline({ paused: true });
 
-      // Fondo
-      tl.fromTo("#pattern", { opacity: 0, x: 0 }, { opacity: 1, x: 80, duration: 9, ease: "none" }, 0);
-      tl.fromTo("#glow", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 1.4, ease: "power2.out" }, 1.2);
-
       // Corona: se dibuja el contorno, se rellena y aparecen las joyas
       tl.fromTo("#crown .draw", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.4, ease: "power2.inOut", stagger: 0.15 }, 0.2);
       tl.to("#crown-fill", { opacity: 1, duration: 0.6, ease: "power1.out" }, 1.4);
       tl.fromTo(".jewel", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(3)", stagger: 0.08 }, 1.6);
       tl.fromTo("#crown", { y: 30, scale: 0.92 }, { y: 0, scale: 1, duration: 2, ease: "power3.out" }, 0.2);
-      tl.to("#crown", { y: -10, duration: 3.5, ease: "sine.inOut" }, 3.5);
-
-      // Destellos (posiciones y tiempos fijos → render determinista)
-      const sparkTimes = [1.8, 2.1, 2.3, 2.6, 2.9, 3.2, 3.6, 4.4, 4.9, 5.5, 6.1, 6.7];
-      document.querySelectorAll(".spark").forEach((el, i) => {
-        const t = sparkTimes[i];
-        tl.fromTo(el, { opacity: 0, scale: 0.2, rotation: 0 }, { opacity: 1, scale: 1.6, rotation: 90, duration: 0.35, ease: "power2.out" }, t);
-        tl.to(el, { opacity: 0, scale: 0.3, duration: 0.5, ease: "power2.in" }, t + 0.35);
-      });
-
-      // Títulos
-      tl.to("#rule-1", { scaleX: 1, duration: 0.9, ease: "power3.inOut" }, 2.2);
-      tl.fromTo("#kicker", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 2.5);
-      tl.fromTo("#title span", { opacity: 0, y: 120 }, { opacity: 1, y: 0, duration: 0.8, ease: "power4.out", stagger: 0.06 }, 2.7);
-      tl.to("#rule-2", { scaleX: 1, duration: 0.9, ease: "power3.inOut" }, 3.3);
-      tl.fromTo("#sheen", { x: -400, skewX: -15 }, { x: 1400, skewX: -15, duration: 1.2, ease: "power2.inOut" }, 4.0);
-      tl.fromTo("#tagline .word, #tagline .dot", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.18 }, 4.3);
+      tl.to("#crown", { y: -12, duration: 3, ease: "sine.inOut" }, 2.4);
 
       // Salida
-      tl.to("#fade", { opacity: 1, duration: 0.8, ease: "power1.in" }, 8.2);
+      tl.to("#crown", { opacity: 0, duration: 0.6, ease: "power1.in" }, 5.4);
 
       window.__timelines["main"] = tl;
       tl.seek(0);
