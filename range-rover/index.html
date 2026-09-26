@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=3840, height=2160" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 3840px;
+        height: 2160px;
+        overflow: hidden;
+        background: #000;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      #clip {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* ---------- Tarjeta de cristal líquido ---------- */
+      #card {
+        position: absolute;
+        left: 2250px;
+        top: 120px;
+        width: 1400px;
+        padding: 64px 84px 70px;
+        border-radius: 72px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.16) 100%);
+        backdrop-filter: blur(40px) saturate(180%) brightness(0.78);
+        -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(0.78);
+        border: 3px solid rgba(255, 255, 255, 0.35);
+        box-shadow:
+          inset 0 4px 2px rgba(255, 255, 255, 0.6),
+          inset 0 -3px 2px rgba(255, 255, 255, 0.15),
+          0 40px 120px rgba(0, 0, 0, 0.35);
+        transform-origin: 50% 50%;
+      }
+      #rim {
+        position: absolute;
+        inset: 0;
+        border-radius: 72px;
+        padding: 4px;
+        background: linear-gradient(140deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 32%, rgba(255, 255, 255, 0) 68%, rgba(255, 255, 255, 0.55) 100%);
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+      }
+      #shine {
+        position: absolute;
+        top: -20%;
+        left: 0;
+        width: 380px;
+        height: 140%;
+        background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+      }
+      #text {
+        position: relative;
+        text-align: center;
+        color: #ffffff;
+        text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      }
+      #kicker {
+        font-size: 50px;
+        font-weight: 600;
+        letter-spacing: 0.42em;
+        padding-left: 0.42em;
+        opacity: 0.92;
+      }
+      #line {
+        width: 260px;
+        height: 4px;
+        margin: 30px auto 26px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.85);
+      }
+      #title-mask {
+        overflow: hidden;
+        padding: 6px 0 10px;
+      }
+      #title {
+        font-size: 132px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        white-space: nowrap;
+      }
+      #title span {
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="3.23"
+      data-width="3840"
+      data-height="2160"
+    >
+      <video
+        id="clip"
+        class="clip"
+        src="assets/video/clip.mp4"
+        data-start="0"
+        data-duration="3.23"
+        data-track-index="0"
+        muted
+        playsinline
+      ></video>
+      <audio id="clip-audio" src="assets/video/clip.mp4" data-start="0" data-duration="3.23" data-track-index="10" data-volume="1"></audio>
+
+      <div id="card" class="clip" data-start="0" data-duration="3.23" data-track-index="1">
+        <div id="rim"></div>
+        <div id="shine" data-layout-allow-overflow></div>
+        <div id="text">
+          <div id="kicker">LAND ROVER</div>
+          <div id="line"></div>
+          <div id="title-mask" data-layout-allow-occlusion>
+            <div id="title"><span>R</span><span>A</span><span>N</span><span>G</span><span>E</span><span>&nbsp;</span><span>R</span><span>O</span><span>V</span><span>E</span><span>R</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Entrada de la tarjeta: "gota" de cristal que se expande
+      tl.fromTo(
+        "#card",
+        { opacity: 0, scaleX: 0.55, scaleY: 0.35, y: -40 },
+        { opacity: 1, scaleX: 1, scaleY: 1, y: 0, duration: 0.7, ease: "back.out(1.6)" },
+        0.1
+      );
+      tl.fromTo("#kicker", { opacity: 0, y: 20 }, { opacity: 0.92, y: 0, duration: 0.45, ease: "power2.out" }, 0.45);
+      tl.fromTo("#line", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 0.55);
+      tl.fromTo("#title span", { y: 170 }, { y: 0, duration: 0.55, ease: "power4.out", stagger: 0.035 }, 0.6);
+      tl.fromTo("#shine", { x: -600, skewX: -15 }, { x: 1700, skewX: -15, duration: 1.1, ease: "power2.inOut" }, 1.3);
+      // Leve flotación hasta el final
+      tl.to("#card", { y: -14, duration: 2.2, ease: "sine.inOut" }, 1.0);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
