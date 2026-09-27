@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #e9dfcb;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      #scene {
+        position: absolute;
+        inset: 0;
+        background: #e9dfcb;
+      }
+
+      /* ---------- Papel ---------- */
+      #paper {
+        position: absolute;
+        left: -30px;
+        top: -30px;
+        width: 1980px;
+        height: 1140px;
+      }
+      #vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% 45%, rgba(255, 250, 238, 0.35) 0%, rgba(120, 95, 60, 0) 50%, rgba(90, 65, 35, 0.28) 100%);
+      }
+
+      /* ---------- Recortes de papel ---------- */
+      #logo {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 720px;
+        height: 374px;
+        margin: -187px 0 0 -360px;
+        opacity: 0;
+        /* borde blanco del recorte + sombra sobre el papel */
+        filter: drop-shadow(5px 0 0 #fbf8f1) drop-shadow(-5px 0 0 #fbf8f1) drop-shadow(0 5px 0 #fbf8f1) drop-shadow(0 -5px 0 #fbf8f1)
+          drop-shadow(8px 12px 6px rgba(60, 40, 15, 0.45));
+      }
+      #word {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 760px;
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+      }
+      .letter {
+        display: inline-block;
+        width: 116px;
+        height: 150px;
+        line-height: 150px;
+        text-align: center;
+        font-size: 124px;
+        font-weight: 900;
+        font-style: italic;
+        color: #005a2b;
+        background: #fbf8f1;
+        border-radius: 10px;
+        box-shadow:
+          inset 0 0 0 2px rgba(0, 0, 0, 0.04),
+          6px 9px 5px rgba(60, 40, 15, 0.4);
+        opacity: 0;
+      }
+      .gap {
+        width: 44px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="2"
+      data-fps="24"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="scene" class="clip" data-start="0" data-duration="2" data-track-index="0">
+        <!-- Textura de papel (determinista, generada con ruido SVG) -->
+        <svg id="paper" viewBox="0 0 1980 1140" preserveAspectRatio="none">
+          <filter id="grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.26  0 0 0 0 0.14  0 0 0 0.55 0" />
+          </filter>
+          <filter id="fibers">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.08" numOctaves="2" seed="3" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.36  0 0 0 0 0.22  0 0 0 0.35 0" />
+          </filter>
+          <rect width="1980" height="1140" fill="#e9dfcb" />
+          <rect width="1980" height="1140" filter="url(#fibers)" />
+          <rect width="1980" height="1140" filter="url(#grain)" opacity="0.5" />
+        </svg>
+        <div id="vignette"></div>
+
+        <img id="logo" src="assets/logo.png" alt="Land Rover" />
+
+        <div id="word">
+          <span class="letter">R</span><span class="letter">A</span><span class="letter">N</span><span class="letter">G</span><span class="letter">E</span>
+          <span class="gap"></span>
+          <span class="letter">R</span><span class="letter">O</span><span class="letter">V</span><span class="letter">E</span><span class="letter">R</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Stop motion: 12 poses por segundo (cada pose dura 2 fotogramas a 24 fps)
+      const POSE = 1 / 12;
+      const at = (p) => Math.max(0, p * POSE - 0.001);
+      // "Aleatorio" determinista para el temblor hecho a mano
+      const rnd = (a, b) => {
+        const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+        return x - Math.floor(x) - 0.5; // -0.5 .. 0.5
+      };
+      const TOTAL = 24;
+
+      // Papel: pequeño temblor en cada pose
+      for (let p = 0; p < TOTAL; p++) {
+        tl.set("#paper", { x: rnd(p, 1) * 10, y: rnd(p, 2) * 10 }, at(p));
+      }
+
+      // Logo: entra a saltos desde abajo, se asienta y luego sube para dejar sitio
+      const logoPath = [
+        null, null, // poses 0-1: papel vacío
+        { y: 520, r: -14, s: 0.9 },
+        { y: 260, r: 9, s: 0.95 },
+        { y: 70, r: -5, s: 1.02 },
+        { y: -18, r: 3, s: 1.0 },
+        { y: 0, r: -1, s: 1.0 },
+        { y: 0, r: 0.5, s: 1.0 },
+        { y: 0, r: -0.5, s: 1.0 },
+        { y: 0, r: 0.8, s: 1.0 },
+        { y: -80, r: -2, s: 0.92 },
+        { y: -170, r: 1.5, s: 0.84 },
+        { y: -205, r: -0.6, s: 0.8 },
+      ];
+      for (let p = 0; p < TOTAL; p++) {
+        const k = logoPath[Math.min(p, logoPath.length - 1)];
+        if (!k) continue;
+        tl.set(
+          "#logo",
+          { opacity: 1, x: rnd(p, 3) * 8, y: k.y + rnd(p, 4) * 6, rotation: k.r + rnd(p, 5) * 1.4, scale: k.s },
+          at(p)
+        );
+      }
+
+      // RANGE ROVER: las letras de papel caen de dos en dos (poses 12-17)
+      const letters = document.querySelectorAll(".letter");
+      letters.forEach((el, i) => {
+        const pIn = 12 + Math.floor(i / 2);
+        const baseRot = rnd(i, 9) * 10;
+        // pose de entrada: un poco más arriba y torcida
+        tl.set(el, { opacity: 1, y: -60, rotation: baseRot * 2.2, scale: 1.12 }, at(pIn));
+        for (let p = pIn + 1; p < TOTAL; p++) {
+          tl.set(el, { y: rnd(p, i + 20) * 5, x: rnd(p, i + 40) * 4, rotation: baseRot + rnd(p, i + 60) * 2, scale: 1 }, at(p));
+        }
+      });
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
