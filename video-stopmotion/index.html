@@ -42,7 +42,8 @@
       #dim {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.58);
+        /* Solo la zona izquierda (donde va el stop motion); se desvanece hacia el centro */
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0.25) 42%, rgba(0, 0, 0, 0) 52%);
       }
       /* Grano de papel muy suave sobre la capa oscura */
       #grain {
@@ -53,6 +54,8 @@
         height: 2240px;
         opacity: 0.35;
         mix-blend-mode: overlay;
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 32%, rgba(0, 0, 0, 0) 50%);
+        mask-image: linear-gradient(90deg, #000 0%, #000 32%, rgba(0, 0, 0, 0) 50%);
       }
 
       /* ---------- Recortes de papel ---------- */
@@ -145,8 +148,8 @@
       };
       const TOTAL = 40; // 3.33 s de poses (el vídeo dura 3.26 s)
 
-      // Capa oscura: entra al empezar la frase
-      tl.fromTo("#overlay", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, 0.05);
+      // Capa oscura (solo zona izquierda): entra justo antes del logo
+      tl.fromTo("#overlay", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, 0.85);
       for (let p = 0; p < TOTAL; p++) {
         tl.set("#grain", { x: rnd(p, 1) * 30, y: rnd(p, 2) * 30 }, at(p));
       }
