@@ -50,10 +50,22 @@
         height: 519px;
         margin: -260px 0 0 -500px;
       }
-      #logo {
+      #logo-wrap {
+        transform-style: preserve-3d;
+      }
+      #logo,
+      #logo-back {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         display: block;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      /* Cara trasera: el mismo logo girado 180° para que nunca se lea al revés */
+      #logo-back {
+        transform: rotateY(180deg);
       }
       /* Brillo que recorre el óvalo */
       #shine-mask {
@@ -93,6 +105,7 @@
         <div id="ring-2" class="ring"></div>
         <div id="logo-wrap">
           <img id="logo" src="assets/logo.png" alt="Land Rover" />
+          <img id="logo-back" src="assets/logo.png" alt="" />
           <div id="shine-mask" data-layout-allow-overflow><div id="shine" data-layout-allow-overflow></div></div>
         </div>
         <div id="fade"></div>
@@ -102,25 +115,25 @@
     <script>
       const tl = gsap.timeline({ paused: true });
 
-      // Entrada: el óvalo crece de pequeño a grande
+      // Entrada: el óvalo crece de pequeño a grande mientras gira (2 vueltas)
       tl.fromTo(
         "#logo-wrap",
-        { scale: 0.05 },
-        { scale: 1, duration: 1.1, ease: "back.out(1.3)" },
+        { scale: 0.05, rotationY: -720 },
+        { scale: 1, rotationY: 0, duration: 1.5, ease: "power3.out" },
         0.2
       );
-      tl.fromTo("#logo", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" }, 0.2);
+      tl.fromTo("#logo, #logo-back", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" }, 0.2);
 
       // Ondas plateadas al "asentarse"
-      tl.fromTo("#ring-1", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.45, duration: 1.1, ease: "power2.out", immediateRender: false }, 1.15);
-      tl.fromTo("#ring-2", { opacity: 0.7, scale: 1 }, { opacity: 0, scale: 1.8, duration: 1.4, ease: "power2.out", immediateRender: false }, 1.3);
+      tl.fromTo("#ring-1", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.45, duration: 1.1, ease: "power2.out", immediateRender: false }, 1.55);
+      tl.fromTo("#ring-2", { opacity: 0.7, scale: 1 }, { opacity: 0, scale: 1.8, duration: 1.4, ease: "power2.out", immediateRender: false }, 1.7);
 
       // Brillo metálico
-      tl.fromTo("#shine", { x: -300, skewX: -18 }, { x: 1150, skewX: -18, duration: 1.0, ease: "power2.inOut" }, 1.4);
+      tl.fromTo("#shine", { x: -300, skewX: -18 }, { x: 1150, skewX: -18, duration: 1.0, ease: "power2.inOut" }, 1.8);
       tl.fromTo("#shine", { x: -300, skewX: -18 }, { x: 1150, skewX: -18, duration: 1.0, ease: "power2.inOut", immediateRender: false }, 3.9);
 
       // Respiración lenta
-      tl.to("#logo-wrap", { scale: 1.04, duration: 3.6, ease: "sine.inOut" }, 1.4);
+      tl.to("#logo-wrap", { scale: 1.04, duration: 3.5, ease: "sine.inOut" }, 1.75);
 
       // Salida
       tl.to("#fade", { opacity: 1, duration: 0.7, ease: "power1.in" }, 5.3);
