@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=3840, height=2160" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 3840px;
+        height: 2160px;
+        overflow: hidden;
+        background: #000;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      #clip {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* ---------- Capas oscuras ---------- */
+      #fx {
+        position: absolute;
+        inset: 0;
+      }
+      .layer {
+        position: absolute;
+        inset: 0;
+      }
+      /* estado inicial = final del clip anterior: solo la izquierda oscurecida */
+      #dim-left {
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0.25) 42%, rgba(0, 0, 0, 0) 52%);
+      }
+      #dim-full {
+        background: rgba(0, 0, 0, 0.82);
+        opacity: 0;
+      }
+      .grain {
+        position: absolute;
+        left: -40px;
+        top: -40px;
+        width: 3920px;
+        height: 2240px;
+        opacity: 0.35;
+        mix-blend-mode: overlay;
+      }
+      #grain-left {
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 32%, rgba(0, 0, 0, 0) 50%);
+        mask-image: linear-gradient(90deg, #000 0%, #000 32%, rgba(0, 0, 0, 0) 50%);
+      }
+      #grain-full {
+        opacity: 0;
+      }
+
+      /* ---------- Letras del clip anterior ---------- */
+      #word {
+        position: absolute;
+        left: 130px;
+        top: 1000px;
+        width: 1300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+      }
+      .row {
+        display: flex;
+        gap: 28px;
+      }
+      .letter {
+        display: inline-block;
+        width: 232px;
+        height: 300px;
+        line-height: 300px;
+        text-align: center;
+        font-size: 248px;
+        font-weight: 900;
+        font-style: italic;
+        color: #005a2b;
+        background: #fbf8f1;
+        border-radius: 20px;
+        box-shadow:
+          inset 0 0 0 4px rgba(0, 0, 0, 0.04),
+          12px 18px 10px rgba(0, 0, 0, 0.5);
+      }
+
+      /* ---------- Esquema ---------- */
+      #diagram {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 3840px;
+        height: 2160px;
+        transform-origin: 0 0;
+      }
+      #lines {
+        position: absolute;
+        inset: 0;
+        width: 3840px;
+        height: 2160px;
+        overflow: visible;
+      }
+      #lines path {
+        fill: none;
+        stroke: #f3ead7;
+        stroke-width: 9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      #lines .draw,
+      #lujo path {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+      }
+      #lines .head {
+        stroke-width: 10;
+        opacity: 0;
+      }
+      #logo {
+        position: absolute;
+        left: 1520px;
+        top: 122px;
+        width: 800px;
+        height: 415px;
+        filter: drop-shadow(8px 0 0 #fbf8f1) drop-shadow(-8px 0 0 #fbf8f1) drop-shadow(0 8px 0 #fbf8f1) drop-shadow(0 -8px 0 #fbf8f1)
+          drop-shadow(14px 20px 10px rgba(0, 0, 0, 0.55));
+      }
+      .anchor {
+        position: absolute;
+        width: 0;
+        display: flex;
+        justify-content: center;
+      }
+      .family {
+        flex: none;
+        height: 170px;
+        padding: 0 60px;
+        line-height: 170px;
+        white-space: nowrap;
+        font-size: 104px;
+        font-weight: 900;
+        font-style: italic;
+        letter-spacing: 0.02em;
+        color: #005a2b;
+        background: #fbf8f1;
+        border-radius: 22px;
+        box-shadow: 12px 18px 10px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+      }
+      .tag-anchor {
+        position: absolute;
+      }
+      .tag {
+        display: inline-block;
+        height: 110px;
+        padding: 0 40px;
+        line-height: 110px;
+        white-space: nowrap;
+        font-size: 64px;
+        font-weight: 700;
+        color: #1d2a22;
+        background: #efe6d2;
+        border-radius: 16px;
+        box-shadow: 8px 12px 8px rgba(0, 0, 0, 0.45);
+        opacity: 0;
+      }
+      #rr-glow {
+        position: absolute;
+        left: 800px;
+        top: 1000px;
+        width: 1500px;
+        height: 700px;
+        margin: -350px 0 0 -750px;
+        background: radial-gradient(ellipse at center, rgba(243, 215, 122, 0.55) 0%, rgba(243, 215, 122, 0) 62%);
+        opacity: 0;
+      }
+
+      /* ---------- "lujo" escrito a mano (fuera del zoom) ---------- */
+      #lujo {
+        position: absolute;
+        left: 2420px;
+        top: 500px;
+        width: 1100px;
+        height: 550px;
+        overflow: visible;
+        filter: drop-shadow(0 0 24px rgba(243, 215, 122, 0.6));
+      }
+      #lujo path {
+        fill: none;
+        stroke: #f3d77a;
+        stroke-width: 9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="8.6"
+      data-width="3840"
+      data-height="2160"
+    >
+      <video id="clip" class="clip" src="assets/video/clip.mp4" data-start="0" data-duration="8.6" data-track-index="0" muted playsinline></video>
+      <audio id="clip-audio" src="assets/video/clip.mp4" data-start="0" data-duration="8.6" data-track-index="10" data-volume="1"></audio>
+
+      <div id="fx" class="clip" data-start="0" data-duration="8.6" data-track-index="1">
+        <div id="dim-left" class="layer"></div>
+        <div id="dim-full" class="layer"></div>
+        <svg class="grain" id="grain-left" viewBox="0 0 3920 2240" preserveAspectRatio="none">
+          <filter id="paper-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.45" numOctaves="3" seed="7" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.82  0 0 0 0 0.68  0 0 0 0.6 0" />
+          </filter>
+          <rect width="3920" height="2240" filter="url(#paper-noise)" />
+        </svg>
+        <svg class="grain" id="grain-full" viewBox="0 0 3920 2240" preserveAspectRatio="none">
+          <rect width="3920" height="2240" filter="url(#paper-noise)" />
+        </svg>
+
+        <div id="word">
+          <div class="row"><span class="letter">R</span><span class="letter">A</span><span class="letter">N</span><span class="letter">G</span><span class="letter">E</span></div>
+          <div class="row"><span class="letter">R</span><span class="letter">O</span><span class="letter">V</span><span class="letter">E</span><span class="letter">R</span></div>
+        </div>
+
+        <div id="diagram">
+          <div id="rr-glow"></div>
+          <svg id="lines" viewBox="0 0 3840 2160">
+            <!-- logo → familias -->
+            <path class="draw fam-line rr" pathLength="1" d="M1920 570 C1920 780 800 700 800 895" />
+            <path class="draw fam-line def" pathLength="1" d="M1920 570 L1920 895" />
+            <path class="draw fam-line disc" pathLength="1" d="M1920 570 C1920 780 3040 700 3040 895" />
+            <path class="head fam-head rr" d="M772 862 L800 900 L828 862" />
+            <path class="head fam-head def" d="M1892 862 L1920 900 L1948 862" />
+            <path class="head fam-head disc" d="M3012 862 L3040 900 L3068 862" />
+            <!-- troncos de modelos -->
+            <path class="draw trunk rr" pathLength="1" d="M470 1090 L470 1705" />
+            <path class="draw trunk def" pathLength="1" d="M1590 1090 L1590 1555" />
+            <path class="draw trunk disc" pathLength="1" d="M2710 1090 L2710 1405" />
+          </svg>
+
+          <img id="logo" src="assets/logo.png" alt="Land Rover" />
+
+          <div class="anchor" style="left: 800px; top: 915px"><div id="fam-rr" class="family rr">RANGE ROVER</div></div>
+          <div class="anchor" style="left: 1920px; top: 915px"><div id="fam-def" class="family def">DEFENDER</div></div>
+          <div class="anchor" style="left: 3040px; top: 915px"><div id="fam-disc" class="family disc">DISCOVERY</div></div>
+
+          <!-- modelos (las ramas cortas se generan en el script) -->
+          <div id="tags"></div>
+        </div>
+
+        <svg id="lujo" viewBox="0 0 400 200">
+          <path id="lujo-word" pathLength="1"
+            d="M10 132 C30 112 50 64 48 34 C46 12 30 16 32 42 C34 82 36 122 44 140
+               C52 147 60 140 64 122 L70 94 C66 116 63 140 78 142 C90 144 96 126 100 96
+               L98 130 C98 143 104 146 112 140 C117 126 120 110 124 96
+               C126 132 126 166 118 190 C112 206 96 200 104 186 C112 172 130 152 142 136
+               C147 112 152 96 166 96 C184 96 185 131 166 142 C150 150 145 121 160 101 C166 93 180 92 192 99" />
+          <path id="lujo-dot" pathLength="1" d="M127 70 C129 67 132 66 133 69" />
+        </svg>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const POSE = 1 / 12;
+      const at = (p) => Math.max(0, p * POSE - 0.001);
+      const rnd = (a, b) => {
+        const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+        return x - Math.floor(x) - 0.5;
+      };
+
+      // ---------- Modelos de cada familia ----------
+      const models = {
+        rr: { x: 800, items: ["Range Rover", "Range Rover Sport", "Range Rover Velar", "Range Rover Evoque"] },
+        def: { x: 1920, items: ["Defender 90", "Defender 110", "Defender 130"] },
+        disc: { x: 3040, items: ["Discovery", "Discovery Sport"] },
+      };
+      const tagsBox = document.getElementById("tags");
+      const lines = document.getElementById("lines");
+      const NS = "http://www.w3.org/2000/svg";
+      const tagEls = { rr: [], def: [], disc: [] };
+      const branchEls = { rr: [], def: [], disc: [] };
+      Object.entries(models).forEach(([fam, m]) => {
+        m.items.forEach((name, i) => {
+          const cy = 1255 + i * 150;
+          const trunkX = m.x - 330;
+          const b = document.createElementNS(NS, "path");
+          b.setAttribute("d", `M${trunkX} ${cy} L${trunkX + 70} ${cy}`);
+          b.setAttribute("pathLength", "1");
+          b.setAttribute("class", `draw branch ${fam}`);
+          lines.appendChild(b);
+          const h = document.createElementNS(NS, "path");
+          h.setAttribute("d", `M${trunkX + 52} ${cy - 20} L${trunkX + 78} ${cy} L${trunkX + 52} ${cy + 20}`);
+          h.setAttribute("class", `head branch-head ${fam}`);
+          lines.appendChild(h);
+          const a = document.createElement("div");
+          a.className = "tag-anchor";
+          a.style.left = `${trunkX + 95}px`;
+          a.style.top = `${cy - 55}px`;
+          a.innerHTML = `<div class="tag ${fam}">${name}</div>`;
+          tagsBox.appendChild(a);
+          tagEls[fam].push(a.firstChild);
+          branchEls[fam].push([b, h]);
+        });
+      });
+
+      // Estado inicial: logo donde acabó el clip anterior (izquierda, más grande)
+      const LOGO_FROM = { x: -1140, y: 160, scale: 1.3, rotation: -0.6 };
+      tl.set("#logo", LOGO_FROM, 0);
+
+      // Temblor stop motion del grano
+      for (let p = 0; p < 104; p++) {
+        tl.set(".grain", { x: rnd(p, 1) * 30, y: rnd(p, 2) * 30 }, at(p));
+      }
+
+      // ---------- 1 · Oscurecer todo (0.3 – 0.8 s) ----------
+      tl.to("#dim-full", { opacity: 1, duration: 0.5, ease: "power1.inOut" }, 0.3);
+      tl.to("#grain-full", { opacity: 0.35, duration: 0.5, ease: "power1.inOut" }, 0.3);
+      tl.to("#grain-left", { opacity: 0, duration: 0.5 }, 0.3);
+
+      // Las letras salen volando hacia abajo a saltos
+      document.querySelectorAll(".letter").forEach((el, i) => {
+        const r0 = rnd(i, 9) * 10;
+        for (let k = 0; k < 6; k++) {
+          const p = 4 + Math.floor(i / 3) + k;
+          tl.set(el, { y: k * k * 90, x: rnd(i, k) * 60 * k, rotation: r0 + k * 14 * (i % 2 ? 1 : -1), opacity: k === 5 ? 0 : 1 }, at(p));
+        }
+      });
+
+      // El logo viaja al centro superior a saltos (poses 5 – 12)
+      const logoSteps = 7;
+      for (let k = 1; k <= logoSteps; k++) {
+        const f = gsap.parseEase("power2.inOut")(k / logoSteps);
+        tl.set(
+          "#logo",
+          {
+            x: LOGO_FROM.x * (1 - f) + rnd(k, 3) * 14 * (1 - f),
+            y: LOGO_FROM.y * (1 - f) + rnd(k, 4) * 14 * (1 - f),
+            scale: LOGO_FROM.scale + (1 - LOGO_FROM.scale) * f,
+            rotation: rnd(k, 5) * 4 * (1 - f),
+          },
+          at(5 + k)
+        );
+      }
+
+      // ---------- 2 · Flechas a las familias (1.2 – 2.1 s) ----------
+      const fams = ["rr", "def", "disc"];
+      fams.forEach((fam, i) => {
+        const t = 1.2 + i * 0.12;
+        tl.to(`.fam-line.${fam}`, { strokeDashoffset: 0, duration: 0.5, ease: "steps(6)" }, t);
+        tl.set(`.fam-head.${fam}`, { opacity: 1 }, t + 0.5);
+        // tarjeta de papel: pop en dos poses
+        tl.set(`#fam-${fam}`, { opacity: 1, scale: 1.15, rotation: rnd(i, 11) * 8 }, t + 0.5);
+        tl.set(`#fam-${fam}`, { scale: 1, rotation: rnd(i, 12) * 3 }, t + 0.5 + POSE);
+      });
+
+      // ---------- 3 · Modelos (2.6 – 4.5 s) ----------
+      fams.forEach((fam, i) => {
+        const t0 = 2.6 + i * 0.55;
+        tl.to(`.trunk.${fam}`, { strokeDashoffset: 0, duration: 0.3, ease: "steps(4)" }, t0);
+        tagEls[fam].forEach((tag, j) => {
+          const t = t0 + 0.15 + j * 0.13;
+          const [branch, head] = branchEls[fam][j];
+          tl.to(branch, { strokeDashoffset: 0, duration: POSE * 2, ease: "steps(2)" }, t);
+          tl.set(head, { opacity: 1 }, t + POSE * 2);
+          tl.set(tag, { opacity: 1, scale: 1.12, rotation: rnd(j, 20 + i) * 8 }, t + POSE * 2);
+          tl.set(tag, { scale: 1, rotation: rnd(j, 30 + i) * 2.5 }, t + POSE * 3);
+        });
+      });
+
+      // ---------- 4 · Zoom a Range Rover (5.0 – 5.9 s) ----------
+      tl.to("#diagram", { x: 370, y: -780, scale: 1.6, duration: 0.9, ease: "power3.inOut" }, 5.0);
+      tl.to(".def, .disc", { opacity: 0, duration: 0.5, ease: "power1.out" }, 5.0);
+      tl.to("#logo", { opacity: 0, duration: 0.5 }, 5.0);
+      tl.fromTo("#rr-glow", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 5.7);
+      tl.to("#fam-rr", { scale: 1.06, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1 }, 5.75);
+      tl.to("#rr-glow", { opacity: 0.7, duration: 0.8, ease: "sine.inOut", yoyo: true, repeat: 2 }, 6.4);
+
+      // ---------- 5 · "lujo" escrito a mano (6.0 – 7.0 s) ----------
+      tl.to("#lujo-word", { strokeDashoffset: 0, duration: 0.9, ease: "power1.inOut" }, 6.0);
+      tl.to("#lujo-dot", { strokeDashoffset: 0, duration: 0.12, ease: "none" }, 6.95);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
