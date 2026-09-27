@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=3840, height=2160" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 3840px;
+        height: 2160px;
+        overflow: hidden;
+        background: #000;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      #clip {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* ---------- Capa oscura (deja ver el vídeo) ---------- */
+      #overlay {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+      }
+      #dim {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.58);
+      }
+      /* Grano de papel muy suave sobre la capa oscura */
+      #grain {
+        position: absolute;
+        left: -40px;
+        top: -40px;
+        width: 3920px;
+        height: 2240px;
+        opacity: 0.35;
+        mix-blend-mode: overlay;
+      }
+
+      /* ---------- Recortes de papel ---------- */
+      #logo {
+        position: absolute;
+        left: 230px;
+        top: 250px;
+        width: 1100px;
+        height: 571px;
+        opacity: 0;
+        filter: drop-shadow(10px 0 0 #fbf8f1) drop-shadow(-10px 0 0 #fbf8f1) drop-shadow(0 10px 0 #fbf8f1) drop-shadow(0 -10px 0 #fbf8f1)
+          drop-shadow(16px 24px 12px rgba(0, 0, 0, 0.55));
+      }
+      #word {
+        position: absolute;
+        left: 130px;
+        top: 1000px;
+        width: 1300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+      }
+      .row {
+        display: flex;
+        gap: 28px;
+      }
+      .letter {
+        display: inline-block;
+        width: 232px;
+        height: 300px;
+        line-height: 300px;
+        text-align: center;
+        font-size: 248px;
+        font-weight: 900;
+        font-style: italic;
+        color: #005a2b;
+        background: #fbf8f1;
+        border-radius: 20px;
+        box-shadow:
+          inset 0 0 0 4px rgba(0, 0, 0, 0.04),
+          12px 18px 10px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+      }
+      .gap {
+        width: 88px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="3.26"
+      data-width="3840"
+      data-height="2160"
+    >
+      <video id="clip" class="clip" src="assets/video/clip.mp4" data-start="0" data-duration="3.26" data-track-index="0" muted playsinline></video>
+      <audio id="clip-audio" src="assets/video/clip.mp4" data-start="0" data-duration="3.26" data-track-index="10" data-volume="1"></audio>
+
+      <div id="overlay" class="clip" data-start="0" data-duration="3.26" data-track-index="1">
+        <div id="dim"></div>
+        <svg id="grain" viewBox="0 0 3920 2240" preserveAspectRatio="none">
+          <filter id="paper-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.45" numOctaves="3" seed="7" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.82  0 0 0 0 0.68  0 0 0 0.6 0" />
+          </filter>
+          <rect width="3920" height="2240" filter="url(#paper-noise)" />
+        </svg>
+
+        <img id="logo" src="assets/logo.png" alt="Land Rover" />
+
+        <div id="word">
+          <div class="row"><span class="letter">R</span><span class="letter">A</span><span class="letter">N</span><span class="letter">G</span><span class="letter">E</span></div>
+          <div class="row"><span class="letter">R</span><span class="letter">O</span><span class="letter">V</span><span class="letter">E</span><span class="letter">R</span></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Stop motion: 12 poses por segundo
+      const POSE = 1 / 12;
+      const at = (p) => Math.max(0, p * POSE - 0.001);
+      const rnd = (a, b) => {
+        const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+        return x - Math.floor(x) - 0.5;
+      };
+      const TOTAL = 40; // 3.33 s de poses (el vídeo dura 3.26 s)
+
+      // Capa oscura: entra al empezar la frase
+      tl.fromTo("#overlay", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, 0.05);
+      for (let p = 0; p < TOTAL; p++) {
+        tl.set("#grain", { x: rnd(p, 1) * 30, y: rnd(p, 2) * 30 }, at(p));
+      }
+
+      // Logo: entra a saltos (pose 13 ≈ 1.08 s) y se asienta en "Land" (~1.4 s)
+      const LOGO_IN = 13;
+      const logoPath = [
+        { y: 1500, r: -14, s: 0.9 },
+        { y: 760, r: 9, s: 0.95 },
+        { y: 180, r: -5, s: 1.02 },
+        { y: -36, r: 3, s: 1.0 },
+        { y: 0, r: -1, s: 1.0 },
+      ];
+      // sube para dejar sitio a las letras durante la pausa (~2.25 s)
+      const LOGO_UP = 27;
+      const logoUp = [
+        { y: -30, r: -2, s: 0.97 },
+        { y: -50, r: 1.5, s: 0.95 },
+        { y: -55, r: -0.6, s: 0.95 },
+      ];
+      for (let p = LOGO_IN; p < TOTAL; p++) {
+        let k;
+        if (p < LOGO_IN + logoPath.length) k = logoPath[p - LOGO_IN];
+        else if (p < LOGO_UP) k = { y: 0, r: rnd(p, 7) * 1.6, s: 1 };
+        else k = logoUp[Math.min(p - LOGO_UP, logoUp.length - 1)];
+        tl.set(
+          "#logo",
+          { opacity: 1, x: rnd(p, 3) * 16, y: k.y + rnd(p, 4) * 12, rotation: k.r + rnd(p, 5) * 1.4, scale: k.s },
+          at(p)
+        );
+      }
+
+      // RANGE ROVER: letras de papel de dos en dos desde "Range" (pose 31 ≈ 2.58 s)
+      const LETTERS_IN = 31;
+      document.querySelectorAll(".letter").forEach((el, i) => {
+        const pIn = LETTERS_IN + Math.floor(i / 2);
+        const baseRot = rnd(i, 9) * 10;
+        tl.set(el, { opacity: 1, y: -120, rotation: baseRot * 2.2, scale: 1.12 }, at(pIn));
+        for (let p = pIn + 1; p < TOTAL; p++) {
+          tl.set(el, { y: rnd(p, i + 20) * 10, x: rnd(p, i + 40) * 8, rotation: baseRot + rnd(p, i + 60) * 2, scale: 1 }, at(p));
+        }
+      });
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
