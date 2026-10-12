@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=3840, height=2160" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 3840px;
+        height: 2160px;
+        overflow: hidden;
+        background: #000;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      #clip {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* ---------- Zona izquierda oscurecida (como en los clips anteriores) ---------- */
+      #overlay {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+      }
+      #dim {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0.25) 42%, rgba(0, 0, 0, 0) 52%);
+      }
+      #grain {
+        position: absolute;
+        left: -40px;
+        top: -40px;
+        width: 3920px;
+        height: 2240px;
+        opacity: 0.35;
+        mix-blend-mode: overlay;
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 32%, rgba(0, 0, 0, 0) 50%);
+        mask-image: linear-gradient(90deg, #000 0%, #000 32%, rgba(0, 0, 0, 0) 50%);
+      }
+
+      /* ---------- Letras de papel ---------- */
+      #word {
+        position: absolute;
+        left: 130px;
+        top: 620px;
+        width: 1300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+      }
+      .row {
+        display: flex;
+        gap: 28px;
+      }
+      .letter {
+        display: inline-block;
+        width: 232px;
+        height: 300px;
+        line-height: 300px;
+        text-align: center;
+        font-size: 248px;
+        font-weight: 900;
+        font-style: italic;
+        color: #005a2b;
+        background: #fbf8f1;
+        border-radius: 20px;
+        box-shadow:
+          inset 0 0 0 4px rgba(0, 0, 0, 0.04),
+          12px 18px 10px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+      }
+
+      /* ---------- Subrayado dorado a mano ---------- */
+      #underline {
+        position: absolute;
+        left: 150px;
+        top: 1300px;
+        width: 1260px;
+        height: 200px;
+        overflow: visible;
+        filter: drop-shadow(0 0 18px rgba(243, 215, 122, 0.55));
+      }
+      #underline path {
+        fill: none;
+        stroke: #f3d77a;
+        stroke-width: 22;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="2.6"
+      data-width="3840"
+      data-height="2160"
+    >
+      <video id="clip" class="clip" src="assets/video/clip.mp4" data-start="0" data-duration="2.6" data-track-index="0" muted playsinline></video>
+      <audio id="clip-audio" src="assets/video/clip.mp4" data-start="0" data-duration="2.6" data-track-index="10" data-volume="1"></audio>
+
+      <div id="overlay" class="clip" data-start="0" data-duration="2.6" data-track-index="1">
+        <div id="dim"></div>
+        <svg id="grain" viewBox="0 0 3920 2240" preserveAspectRatio="none">
+          <filter id="paper-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.45" numOctaves="3" seed="7" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.82  0 0 0 0 0.68  0 0 0 0.6 0" />
+          </filter>
+          <rect width="3920" height="2240" filter="url(#paper-noise)" />
+        </svg>
+
+        <div id="word">
+          <div class="row"><span class="letter">R</span><span class="letter">A</span><span class="letter">N</span><span class="letter">G</span><span class="letter">E</span></div>
+          <div class="row"><span class="letter">R</span><span class="letter">O</span><span class="letter">V</span><span class="letter">E</span><span class="letter">R</span></div>
+        </div>
+
+        <svg id="underline" viewBox="0 0 1260 200">
+          <!-- trazo rápido de rotulador, con un pequeño rizo al final -->
+          <path pathLength="1" d="M40 120 C260 92 520 84 780 88 C960 92 1100 100 1180 82 C1210 76 1214 56 1192 58 C1166 62 1150 96 1176 112" />
+        </svg>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Stop motion: 12 poses por segundo
+      const POSE = 1 / 12;
+      const at = (p) => Math.max(0, p * POSE - 0.001);
+      const rnd = (a, b) => {
+        const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+        return x - Math.floor(x) - 0.5;
+      };
+      const TOTAL = 32; // 2.67 s de poses
+
+      // Zona izquierda oscurecida + grano de papel que tiembla
+      tl.fromTo("#overlay", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, 0.1);
+      for (let p = 0; p < TOTAL; p++) {
+        tl.set("#grain", { x: rnd(p, 1) * 30, y: rnd(p, 2) * 30 }, at(p));
+      }
+
+      // RANGE ROVER: letras de papel que caen de dos en dos (pose 3 ≈ 0.25 s)
+      // y, al asentarse, se quedan QUIETAS (sin temblor) hasta el final
+      const LETTERS_IN = 3;
+      document.querySelectorAll(".letter").forEach((el, i) => {
+        const pIn = LETTERS_IN + Math.floor(i / 2);
+        const restRot = rnd(i, 9) * 8;
+        tl.set(el, { opacity: 1, y: -140, rotation: restRot * 2.4, scale: 1.14 }, at(pIn));
+        tl.set(el, { y: 12, rotation: restRot * 0.6, scale: 0.98 }, at(pIn + 1));
+        tl.set(el, { y: 0, x: rnd(i, 40) * 8, rotation: restRot, scale: 1 }, at(pIn + 2));
+      });
+
+      // Subrayado dorado a mano bajo ROVER (≈0.9 – 1.3 s), en 6 pasos de stop motion
+      tl.to("#underline path", { strokeDashoffset: 0, duration: 0.42, ease: "steps(6)" }, 0.9);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
