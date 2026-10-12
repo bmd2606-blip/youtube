@@ -32,33 +32,14 @@
         background: #000000;
         perspective: 1600px;
       }
-      /* Hoja de 1200x780 dividida en 6x4 trozos que se pliegan en 3D */
+      /* Hoja plana (misma posición que en los fotogramas del simulador) */
       #paper {
         position: absolute;
         left: 360px;
         top: 150px;
         width: 1200px;
         height: 780px;
-        transform-style: preserve-3d;
-      }
-      .tile {
-        position: absolute;
-        width: 202px;
-        height: 197px;
-        overflow: hidden;
-        backface-visibility: visible;
-      }
-      .sheet {
-        position: absolute;
-        width: 1200px;
-        height: 780px;
         background: url("assets/papel.png");
-      }
-      .shade {
-        position: absolute;
-        inset: 0;
-        background: #000;
-        opacity: 0;
       }
 
       /* ---------- Contenido impreso (se repite dentro de cada trozo) ---------- */
@@ -134,104 +115,40 @@
       id="root"
       data-composition-id="main"
       data-start="0"
-      data-duration="6.4"
+      data-duration="3"
       data-width="1920"
       data-height="1080"
     >
-      <div id="scene" class="clip" data-start="0" data-duration="6.4" data-track-index="0">
-        <div id="paper"></div>
+      <div id="scene" class="clip" data-start="0" data-duration="3" data-track-index="0">
+        <div id="paper">
+          <div class="c-kicker" data-layout-allow-overlap>FIN DE LA SEGUNDA GUERRA MUNDIAL</div>
+          <div class="c-rule r1"></div>
+          <div class="c-date" data-layout-allow-overlap></div>
+          <div class="c-year" data-layout-allow-overlap>1945</div>
+          <div class="c-rule r2"></div>
+          <div class="c-foot" data-layout-allow-overlap>Rendición de Japón · Bahía de Tokio</div>
+        </div>
       </div>
     </div>
 
-    <template id="content">
-      <div class="c-kicker" data-layout-allow-overlap data-layout-allow-occlusion>FIN DE LA SEGUNDA GUERRA MUNDIAL</div>
-      <div class="c-rule r1"></div>
-      <div class="c-date" data-layout-allow-overlap data-layout-allow-occlusion></div>
-      <div class="c-year" data-layout-allow-overlap data-layout-allow-occlusion>1945</div>
-      <div class="c-rule r2"></div>
-      <div class="c-foot" data-layout-allow-overlap data-layout-allow-occlusion>Rendición de Japón · Bahía de Tokio</div>
-    </template>
 
     <script>
+      // Parte central: la hoja ya está desplegada (el despliegue y el arrugado son
+      // fotogramas del simulador tools/papel_sim.py, unidos con render_final.sh)
       const tl = gsap.timeline({ paused: true });
-      const rnd = (a, b) => {
-        const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
-        return x - Math.floor(x) - 0.5;
-      };
-
-      // ---------- Construir los trozos de la hoja ----------
-      const COLS = 6, ROWS = 4, TW = 200, TH = 195, PW = 1200, PH = 780;
-      const paper = document.getElementById("paper");
-      const tpl = document.getElementById("content").innerHTML;
       const DATE = "2 de septiembre";
-      const dateHTML = [...DATE].map((ch) => `<span data-layout-allow-overlap data-layout-allow-occlusion>${ch === " " ? "&nbsp;" : ch}</span>`).join("");
-      const tiles = [];
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          const t = document.createElement("div");
-          t.className = "tile";
-          t.style.left = `${c * TW}px`;
-          t.style.top = `${r * TH}px`;
-          t.innerHTML = `<div class="sheet" style="left:${-c * TW}px; top:${-r * TH}px">${tpl}</div><div class="shade"></div>`;
-          t.querySelector(".c-date").innerHTML = dateHTML;
-          paper.appendChild(t);
-          const cx = c * TW + TW / 2 - PW / 2;
-          const cy = r * TH + TH / 2 - PH / 2;
-          tiles.push({ el: t, shade: t.querySelector(".shade"), cx, cy, i: r * COLS + c, dist: Math.hypot(cx, cy) });
-        }
-      }
+      document.querySelector(".c-date").innerHTML = [...DATE]
+        .map((ch) => `<span>${ch === " " ? "&nbsp;" : ch}</span>`)
+        .join("");
 
-      // Pose "arrugada": cada trozo se recoge hacia el centro, girado en 3D
-      const crumpled = (k, seed) => ({
-        x: -k.cx * 0.8 + rnd(k.i, seed + 1) * 60,
-        y: -k.cy * 0.8 + rnd(k.i, seed + 2) * 60,
-        z: rnd(k.i, seed + 3) * 120,
-        rotationX: rnd(k.i, seed + 4) * 300,
-        rotationY: rnd(k.i, seed + 5) * 300,
-        rotationZ: rnd(k.i, seed + 6) * 140,
-        scale: 0.95 + rnd(k.i, seed + 7) * 0.25,
-      });
-      const flat = { x: 0, y: 0, z: 0, rotationX: 0, rotationY: 0, rotationZ: 0, scale: 1 };
-      const maxDist = Math.max(...tiles.map((k) => k.dist));
-
-      // ---------- 1 · Bola de papel que cae (0 – 0.45 s) ----------
-      tiles.forEach((k) => {
-        tl.set(k.el, crumpled(k, 0), 0);
-        tl.set(k.shade, { opacity: 0.35 + rnd(k.i, 50) * 0.4 }, 0);
-      });
-      tl.fromTo("#paper", { y: -800, scale: 0.6, rotation: -30 }, { y: 0, rotation: 8, duration: 0.45, ease: "power2.in" }, 0);
-      tl.to("#paper", { y: -40, duration: 0.12, ease: "power1.out" }, 0.45);
-      tl.to("#paper", { y: 0, duration: 0.1, ease: "power1.in" }, 0.58);
-
-      // ---------- 2 · Se despliega (0.7 – 1.9 s) ----------
-      const UNFOLD = 0.7;
-      tl.to("#paper", { scale: 1, rotation: 0, duration: 1.1, ease: "power3.out" }, UNFOLD);
-      tiles.forEach((k) => {
-        const delay = (k.dist / maxDist) * 0.22; // del centro hacia los bordes
-        tl.to(k.el, { ...flat, duration: 1.0, ease: "power3.out" }, UNFOLD + delay);
-        tl.to(k.shade, { opacity: 0, duration: 0.8, ease: "power2.out" }, UNFOLD + delay);
-      });
-
-      // ---------- 3 · La fecha se imprime (2.0 – 3.4 s) ----------
-      tl.to(".c-kicker", { opacity: 1, duration: 0.4, ease: "power1.out" }, 2.0);
-      tl.fromTo(".c-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 2.1);
+      tl.to(".c-kicker", { opacity: 1, duration: 0.4, ease: "power1.out" }, 0.1);
+      tl.fromTo(".c-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 0.2);
       [...DATE].forEach((_, j) => {
-        tl.set(`.c-date span:nth-child(${j + 1})`, { opacity: 1 }, 2.3 + j * 0.045); // máquina de escribir
+        tl.set(`.c-date span:nth-child(${j + 1})`, { opacity: 1 }, 0.4 + j * 0.045); // máquina de escribir
       });
-      tl.fromTo(".c-year", { opacity: 0, scale: 1.7, rotation: -10 }, { opacity: 0.92, scale: 1, rotation: -3, duration: 0.22, ease: "power4.in" }, 3.05);
-      tl.to("#paper", { x: 6, y: 4, duration: 0.05, yoyo: true, repeat: 3, ease: "none" }, 3.27); // golpe del sello
-      tl.to(".c-foot", { opacity: 1, duration: 0.4, ease: "power1.out" }, 3.45);
-
-      // ---------- 4 · Se vuelve a arrugar (4.9 – 5.8 s) ----------
-      const CRUMPLE = 4.9;
-      tiles.forEach((k) => {
-        const delay = (1 - k.dist / maxDist) * 0.25; // de los bordes hacia el centro
-        tl.to(k.el, { ...crumpled(k, 100), duration: 0.7, ease: "power3.in" }, CRUMPLE + delay);
-        tl.to(k.shade, { opacity: 0.35 + rnd(k.i, 150) * 0.4, duration: 0.7, ease: "power2.in" }, CRUMPLE + delay);
-      });
-      tl.to("#paper", { scale: 0.6, rotation: -12, duration: 0.85, ease: "power3.in" }, CRUMPLE);
-      // la bola sale despedida
-      tl.to("#paper", { x: 1300, y: 260, rotation: 160, duration: 0.5, ease: "power2.in" }, 5.85);
+      tl.fromTo(".c-year", { opacity: 0, scale: 1.7, rotation: -10 }, { opacity: 0.92, scale: 1, rotation: -3, duration: 0.22, ease: "power4.in" }, 1.15);
+      tl.to("#paper", { x: 5, y: 3, duration: 0.05, yoyo: true, repeat: 3, ease: "none" }, 1.37); // golpe del sello
+      tl.to(".c-foot", { opacity: 1, duration: 0.4, ease: "power1.out" }, 1.55);
 
       window.__timelines["main"] = tl;
       tl.seek(0);
